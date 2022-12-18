@@ -12,6 +12,10 @@ const Battle = (props) => {
   const [pokemonAgainstAttack,setPokemonAgainstAttack] = useState(0)
   const [pokemonAgainstDefense,setPokemonAgainstDefense] = useState(0)
   const [pokemonAgainstHp,setPokemonAgainstHp] = useState(pokemon.stats[0].base_stat)
+  const [pokemonActualHp,setPokemonActualHp] = useState(100)
+  const [pokemonActualAgainstHp,setPokemonActualAgainstHp] = useState(100)
+  const [pokemonFirstHp, setPokemonFirstHp] = useState(pokemon.stats[0].base_stat)
+  const [pokemonAgainstFirstHp, setPokemonAgainstFirstHp] = useState(100)
   const navigate = useNavigate();
   const pokeImgEl = useRef(null);
   const pokeAgainstImgEl = useRef(null);
@@ -27,6 +31,8 @@ const Battle = (props) => {
         setPokemonAgainstHp(result.stats[0].base_stat)
         setPokemonAgainstDefense(result.stats[2].base_stat)
         setPokemonAgainstAttack(result.stats[1].base_stat)
+        // setPokemonActualAgainstHp(result.stats[0].base_stat)
+        setPokemonAgainstFirstHp(result.stats[0].base_stat)
       }
     )
   },[])
@@ -38,41 +44,60 @@ const Battle = (props) => {
 
 
 useEffect(()=>{
-    if(pokemonAgainstHp<=0){
+
+    console.log(pokemonActualAgainstHp);
+    console.log(pokemonActualHp);
+
+    if(pokemonActualAgainstHp<=0){
         alert("THE WINNER IS " + pokemon.name)
         setPokemonAgainstHp(0)
         navigate("/winner",{state:pokemon})
 
     }
 
-    if(pokemonHp<=0){
+    if(pokemonActualHp<=0){
       alert("THE WINNER IS " + pokemonAgainst.name)
       setPokemonHp(0)
       navigate("/loser",{state:pokemon})
   }
-},[pokemonAgainstHp,pokemonHp])
+},[pokemonActualHp,pokemonActualAgainstHp])
 
 
  function doDamage(attacker,defender){
-      // defender.stats[0].base_stat = attacker.stats[1].base_stat - defender.stats[2].base_stat // hp = attacker attack - defender defense
-      const hpResult = pokemonAgainstHp - (pokemonAttack-pokemonAgainstDefense)
+      console.log("DO DAMAGE");
+      let hpResult = pokemonAgainstHp - Math.abs(pokemonAttack-pokemonAgainstDefense)
+
+
+      const math = (100 * hpResult) / pokemonAgainstFirstHp
+      console.log(math);
+      console.log(hpResult);
+      setPokemonActualAgainstHp(math)
       setPokemonAgainstHp(hpResult)
+
+
       pokeImgEl.current.className="attacking"
       pokeAgainstImgEl.current.className="defending"
 
       setTimeout(()=>{
         pokeAgainstImgEl.current.className=""
         pokeImgEl.current.className=""
-      },500)
+      },1100)
 
   }
 
 
   function takeDamage(attacker,defender){
-    // defender.stats[0].base_stat = attacker.stats[1].base_stat - defender.stats[2].base_stat // hp = attacker attack - defender defense
     
-    const hpResult = pokemonHp - (pokemonAgainstAttack-pokemonDefense)
-    setPokemonHp(hpResult)
+    let hpResult = pokemonHp - Math.abs(pokemonAgainstAttack-pokemonDefense)
+    
+    // if(pokemonDefense<pokemonAgainstAttack){
+    //   hpResult = pokemonActualHp - 5
+    // }
+    
+    const math = (100 * hpResult) / pokemonFirstHp
+
+      setPokemonActualHp(math)
+      setPokemonHp(hpResult)
     pokeAgainstImgEl.current.className="attacking"
     pokeImgEl.current.className="defending"
 
@@ -80,7 +105,7 @@ useEffect(()=>{
 
       pokeAgainstImgEl.current.className=""
       pokeImgEl.current.className=""
-    },500)
+    },1100)
 }
 
     return (
@@ -92,36 +117,59 @@ useEffect(()=>{
           <div className="battleContainer">
               <div className='pokemonAgainstContainer'>
                 <div className='pokemon-stats'>
-                  <h3>hp: {pokemonAgainstHp}</h3>
-                  <h2>{pokemonAgainst.name}</h2>
-                </div>
-
-                  <img ref={pokeAgainstImgEl} src={pokemonAgainst.sprites.front_default}/>
-                  <ul>
+                <ul className='pokemon-mainStats'>
                           <li> Attack: {pokemonAgainstAttack} </li>
                           <li> Defense: {pokemonAgainstDefense} </li>
+                          <li> Hp: {Math.floor(pokemonAgainstHp)} </li>
                   </ul>
-                  <div>
+                  <div className='attack-button'>
                     <button onClick={()=>takeDamage(pokemonAgainst,pokemon)}>Atacar</button>
                   </div>
+                 
+                </div>
+
+                <div className='pokemon-state'>
+                  <h2 className='pokemon-name'>{pokemonAgainst.name}</h2>
+                  <div className='hpBar'>
+                  <div  style={{"width":pokemonActualAgainstHp+"%"}} className='hpActual'>
+
+
+                    </div>
+                  </div>
+                  </div> 
+                  
+                  <img ref={pokeAgainstImgEl} src={pokemonAgainst.sprites.front_default}/>
+                 
 
               </div>
 
               <div className='pokemonContainer'>
-                <div className='pokemon-stats'>
-                  <h3>hp: {pokemonHp}</h3>
-                  <h2>{pokemon.name}</h2>
-                </div>
-                 
-                 <img ref={pokeImgEl} src={pokemon.sprites.back_default}/>
-                      <ul>
+              <img ref={pokeImgEl} src={pokemon.sprites.back_default}/>
+
+              <div className='pokemon-stats'>
+                <ul className='pokemon-mainStats'>
                           <li> Attack: {pokemonAttack} </li>
                           <li> Defense: {pokemonDefense} </li>
-                      </ul>
-                </div>
-                <div>
-                    <button onClick={()=>doDamage(pokemon,pokemonAgainst)}>Atacar</button>
+                          <li> Hp: {Math.floor(pokemonHp)} </li>
+
+                  </ul>
+                  <div className='attack-button'>
+                    <button onClick={()=>doDamage(pokemonAgainst,pokemon)}>Atacar</button>
                   </div>
+                 
+                </div>
+
+                <div className='pokemon-state'>
+                  <h2 className='pokemon-name'>{pokemon.name}</h2>
+                  <div className='hpBar'>
+                    <div  style={{"width":pokemonActualHp+"%"}} className='hpActual'>
+
+                    </div>
+                  </div>
+                  </div> 
+                  
+                  
+                </div>
 
           </div>
 
