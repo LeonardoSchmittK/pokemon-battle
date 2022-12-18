@@ -7,7 +7,9 @@ const InitialPage = () => {
   
 const navigate = useNavigate();
     return (
-      <div>
+      <div className='initialPage'>
+         <div className="pokemon-logo">
+        </div>
         <button onClick={ ()=>navigate("select-pokemon")}>INICIAR NOVO JOGO</button>
       </div>
     )

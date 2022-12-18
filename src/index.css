@@ -18,6 +18,15 @@ code {
     monospace;
 }
 
+
+.pokemon-logo {
+  width: 50%;
+  height: 100px;
+  background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/1200px-International_Pok%C3%A9mon_logo.svg.png") no-repeat;
+  background-size: contain;
+  margin: 1em;
+}
+
 .pokemonSelector {
   width: 40%;
   height: 500px;
